@@ -1,1 +1,6 @@
-# RL_HCRC_MapTask_DirectionFollowing_Simplified
+Simplified version of Vogel, Adam, and Dan Jurafsky. "Learning to follow navigational directiions"
+
+Major simplifications:
+1) Random action selection instead of Boltzmann exploration
+2) No allocentric or egocentric features in the feature vector
+3) Using some number of iterations instead of looking at theta convergence
