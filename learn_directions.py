@@ -11,7 +11,7 @@ temperature = 2.0
 a_lambda = 1.0
 
 def savePolicyToFile(utterance, saving_to_file, a_string, others):
-    with open("policy_"+saving_to_file+".txt", "ab+") as myfile:
+    with open("results/policy_"+saving_to_file+".txt", "ab+") as myfile:
         if others == 0:
             myfile.write("for utterance: "+utterance+" : "+a_string+"\n")
         else:
@@ -462,7 +462,7 @@ for idx, draw_line in enumerate(draw_lines):
 
 plt.plot()
 #plt.show()
-plt.savefig('trajectory'+saving_keyword+'.png')
+plt.savefig('results/trajectory'+saving_keyword+'.png')
 
 def rotateImage(image, angle):
   image_center = tuple(numpy.array(image.shape)/2.0)
@@ -471,15 +471,15 @@ def rotateImage(image, angle):
   return result
 
 #rotate
-img = cv2.imread('trajectory'+saving_keyword+'.png',0)
-cv2.imwrite('trajectory_rotated'+saving_keyword+'.png', rotateImage(img, 180))
+img = cv2.imread('results/trajectory'+saving_keyword+'.png',0)
+cv2.imwrite('results/trajectory_rotated'+saving_keyword+'.png', rotateImage(img, 180))
 
 #flip
-img = cv2.imread('trajectory_rotated'+saving_keyword+'.png',0)
+img = cv2.imread('results/trajectory_rotated'+saving_keyword+'.png',0)
 rimg=cv2.flip(img,1)
-cv2.imwrite('trajectory_flipped'+saving_keyword+'.png', rimg)
+cv2.imwrite('results/trajectory_flipped'+saving_keyword+'.png', rimg)
 
 #remove temp files
-os.remove('trajectory'+saving_keyword+'.png')
-os.remove('trajectory_rotated'+saving_keyword+'.png')
-os.rename('trajectory_flipped'+saving_keyword+'.png', 'trajectory_'+saving_keyword+'.png')
+os.remove('results/trajectory'+saving_keyword+'.png')
+os.remove('results/trajectory_rotated'+saving_keyword+'.png')
+os.rename('results/trajectory_flipped'+saving_keyword+'.png', 'results/trajectory_'+saving_keyword+'.png')
