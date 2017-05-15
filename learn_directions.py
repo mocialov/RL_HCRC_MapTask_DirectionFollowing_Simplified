@@ -10,8 +10,8 @@ import os
 temperature = 2.0
 a_lambda = 1.0
 
-def savePolicyToFile(utterance, saving_to_file, a_string, others):
-    with open("results/policy_"+saving_to_file+".txt", "ab+") as myfile:
+def savePolicyToFile(utterance, map_i, saving_to_file, a_string, others):
+    with open("results/policy_"+str(map_i)+"_"+saving_to_file+".txt", "ab+") as myfile:
         if others == 0:
             myfile.write("for utterance: "+utterance+" : "+a_string+"\n")
         else:
@@ -387,10 +387,11 @@ for item in state_feature_dict:
 
 callee = "test"
 
-draw_lines = []
+#draw_lines = []
 
 #Testing
 for i in range(8, 9):
+    draw_lines = []
     instruction_giver_utterances = getNextDialogue(i)
     states = createAllStates(instruction_giver_utterances)
 
@@ -424,7 +425,7 @@ for i in range(8, 9):
             #        if tuple(state_feature_dict[key]) == smallest_Q:
             #            others += 1
             #print "for state: ", current_state[0], " take action ", action_for_the_utterance[0]
-            savePolicyToFile(utterance, saving_keyword, "for state: "+ current_state[0]+ " take action "+ action_for_the_utterance[0], others)
+            savePolicyToFile(utterance, i, saving_keyword, "for state: "+ current_state[0]+ " take action "+ action_for_the_utterance[0], others)
             from_point = (-1, -1)
             to_point = (-1, -1)
             for landmark_location in landmarks_locations:
@@ -440,46 +441,64 @@ for i in range(8, 9):
             #if(current_state[0] == "m12_finish"): break
 
 
-import matplotlib.pyplot as plt
-import matplotlib.lines as lines
-from matplotlib.lines import Line2D
-fig, ax = plt.subplots()
+    import matplotlib.pyplot as plt
+    import matplotlib.lines as lines
+    from matplotlib.lines import Line2D
+    fig, ax = plt.subplots()
+    
+    from shapely.geometry.polygon import Polygon
+    from descartes import PolygonPatch
+    from shapely.geometry import Point, MultiPoint, MultiPolygon
+    
+    fig = plt.figure(1, figsize=(10,10), dpi=20)
+    #fig.set_size_inches(10,10)          # Make graph square
+    #scatter([-0.1],[-0.1],s=0.01)     # Move graph window a little left and down
+    
+    itemlist = xmldoc.getElementsByTagName('landmark')
+    for item in itemlist:
+        for item2 in item.getElementsByTagName('spot'):
+            plt.plot(float(item2.attributes['x'].value), float(item2.attributes['y'].value),'o', color='#f16824')
+            ax = fig.add_subplot(111)
+    
+    itemlist = xmldoc.getElementsByTagName('polygon')
+    for item in itemlist:
+        vertices = []
+        for item2 in item.getElementsByTagName('vertix'):
+            vertices.append((float(item2.attributes['x'].value), float(item2.attributes['y'].value)))
+        print vertices
+        if len(vertices) > 0:
+            ring_mixed = Polygon(vertices)
+            ax = fig.add_subplot(111)
+            ring_patch = PolygonPatch(ring_mixed)
+            ax.add_patch(ring_patch)
+    
+    print "lines: ", len(draw_lines)
+    for idx, draw_line in enumerate(draw_lines):
+        (line1_xs, line1_ys) = zip(*draw_line)
+        ax.add_line(Line2D(line1_xs, line1_ys, linewidth=2, color='red'))
+    
+    plt.plot()
+    #plt.show()
+    plt.savefig('results/trajectory_'+str(i)+'_'+saving_keyword+'.png')
+    
+    def rotateImage(image, angle):
+      image_center = tuple(numpy.array(image.shape)/2.0)
+      rot_mat = cv2.getRotationMatrix2D(image_center,angle,0.5)
+      result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
+      return result
+    
+    #rotate
+    img = cv2.imread('results/trajectory_'+str(i)+'_'+saving_keyword+'.png',0)
+    cv2.imwrite('results/trajectory_rotated_'+str(i)+'_'+saving_keyword+'.png', rotateImage(img, 180))
+    
+    #flip
+    img = cv2.imread('results/trajectory_rotated_'+str(i)+'_'+saving_keyword+'.png',0)
+    rimg=cv2.flip(img,1)
+    cv2.imwrite('results/trajectory_flipped_'+str(i)+'_'+saving_keyword+'.png', rimg)
+    
+    #remove temp files
+    os.remove('results/trajectory_'+str(i)+'_'+saving_keyword+'.png')
+    os.remove('results/trajectory_rotated_'+str(i)+'_'+saving_keyword+'.png')
+    os.rename('results/trajectory_flipped_'+str(i)+'_'+saving_keyword+'.png', 'results/trajectory_'+str(i)+'_'+saving_keyword+'.png')
 
-fig = plt.figure(1, figsize=(10,10), dpi=20)
-#fig.set_size_inches(10,10)          # Make graph square
-#scatter([-0.1],[-0.1],s=0.01)     # Move graph window a little left and down
-
-itemlist = xmldoc.getElementsByTagName('landmark')
-for item in itemlist:
-    for item2 in item.getElementsByTagName('spot'):
-        plt.plot(float(item2.attributes['x'].value), float(item2.attributes['y'].value),'o', color='#f16824')
-        ax = fig.add_subplot(111)
-
-print "lines: ", len(draw_lines)
-for idx, draw_line in enumerate(draw_lines):
-    (line1_xs, line1_ys) = zip(*draw_line)
-    ax.add_line(Line2D(line1_xs, line1_ys, linewidth=2, color='red'))
-
-plt.plot()
-#plt.show()
-plt.savefig('results/trajectory'+saving_keyword+'.png')
-
-def rotateImage(image, angle):
-  image_center = tuple(numpy.array(image.shape)/2.0)
-  rot_mat = cv2.getRotationMatrix2D(image_center,angle,0.5)
-  result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
-  return result
-
-#rotate
-img = cv2.imread('results/trajectory'+saving_keyword+'.png',0)
-cv2.imwrite('results/trajectory_rotated'+saving_keyword+'.png', rotateImage(img, 180))
-
-#flip
-img = cv2.imread('results/trajectory_rotated'+saving_keyword+'.png',0)
-rimg=cv2.flip(img,1)
-cv2.imwrite('results/trajectory_flipped'+saving_keyword+'.png', rimg)
-
-#remove temp files
-os.remove('results/trajectory'+saving_keyword+'.png')
-os.remove('results/trajectory_rotated'+saving_keyword+'.png')
-os.rename('results/trajectory_flipped'+saving_keyword+'.png', 'results/trajectory_'+saving_keyword+'.png')
+    plt.gcf().clear()
