@@ -1,4 +1,4 @@
-Simplified version of Vogel, Adam, and Dan Jurafsky. "Learning to follow navigational directiions"
+Simplified version of Adam Vogel and Dan Jurafsky. "Learning to follow navigational directiions"
 
 Major simplifications:
 1) Random action selection instead of Boltzmann exploration
