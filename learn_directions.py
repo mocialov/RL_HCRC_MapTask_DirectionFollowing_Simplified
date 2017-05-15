@@ -5,6 +5,7 @@ import sys
 import numpy
 from scipy.spatial import distance
 import cv2
+import os
 
 temperature = 2.0
 a_lambda = 1.0
@@ -30,7 +31,7 @@ def getNextDialogue(dialogue_transcript):
 #all landmarks
 landmarks = ['m12_start', 'm12_caravan_park', 'm12_old_mill', 'm12_fenced_meadow', 'm12_abandoned_cottage', 'm12_fenced_meadow_2', 'm12_west_lake', 'm12_trig_point', 'm12_monument', 'm12_nuclear_test_site', 'm12_east_lake', 'm12_farmed_land', 'm12_finish']
 
-xmldoc = minidom.parse('landmarks.xml')
+xmldoc = minidom.parse('data/map0/landmarks.xml')
 
 stops = []
 itemlist = xmldoc.getElementsByTagName('stop')
@@ -478,3 +479,7 @@ img = cv2.imread('trajectory_rotated'+saving_keyword+'.png',0)
 rimg=cv2.flip(img,1)
 cv2.imwrite('trajectory_flipped'+saving_keyword+'.png', rimg)
 
+#remove temp files
+os.remove('trajectory'+saving_keyword+'.png')
+os.remove('trajectory_rotated'+saving_keyword+'.png')
+os.rename('trajectory_flipped'+saving_keyword+'.png', 'trajectory_'+saving_keyword+'.png')
