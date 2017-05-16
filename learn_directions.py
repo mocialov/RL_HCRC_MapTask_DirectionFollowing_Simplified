@@ -13,9 +13,9 @@ a_lambda = 1.0
 def savePolicyToFile(utterance, map_i, saving_to_file, a_string, others):
     with open("results/policy_"+str(map_i)+"_"+saving_to_file+".txt", "ab+") as myfile:
         if others == 0:
-            myfile.write("for utterance: "+utterance+" : "+a_string+"\n")
+            myfile.write("for utterance: "+utterance[:-1]+" : "+a_string+"\n")
         else:
-            myfile.write("for utterance: "+utterance+" : "+a_string+" but there are "+str(others)+" more\n")
+            myfile.write("for utterance: "+utterance[:-1]+" : "+a_string+" but there are "+str(others)+" more\n")
 
 def angleBetween(p1, p2):
     ang1 = numpy.arctan2(*p1[::-1])
@@ -486,7 +486,11 @@ for i in range(8, 9):
       rot_mat = cv2.getRotationMatrix2D(image_center,angle,0.5)
       result = cv2.warpAffine(image, rot_mat, image.shape,flags=cv2.INTER_LINEAR)
       return result
+
     
+    #original map
+    original_map = cv2.imread('data/map0/map.png',0)
+
     #rotate
     img = cv2.imread('results/trajectory_'+str(i)+'_'+saving_keyword+'.png',0)
     cv2.imwrite('results/trajectory_rotated_'+str(i)+'_'+saving_keyword+'.png', rotateImage(img, 180))
@@ -494,7 +498,12 @@ for i in range(8, 9):
     #flip
     img = cv2.imread('results/trajectory_rotated_'+str(i)+'_'+saving_keyword+'.png',0)
     rimg=cv2.flip(img,1)
-    cv2.imwrite('results/trajectory_flipped_'+str(i)+'_'+saving_keyword+'.png', rimg)
+    h,w=rimg.shape[:2]
+    original_map = cv2.resize(original_map,(w,h))
+    h2,w2=original_map.shape[:2]
+    #print "sizes", h,w, " and ", h2, w2
+    vis = numpy.hstack((original_map, rimg)) #concattenate(original_map, rimg) #numpy.concatenate((original_map, rimg), axis=1)
+    cv2.imwrite('results/trajectory_flipped_'+str(i)+'_'+saving_keyword+'.png', vis)
     
     #remove temp files
     os.remove('results/trajectory_'+str(i)+'_'+saving_keyword+'.png')
