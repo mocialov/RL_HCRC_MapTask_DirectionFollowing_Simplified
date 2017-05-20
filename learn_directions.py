@@ -331,7 +331,7 @@ for i in range(1,iterations): #until theta converges
         states = createAllStates(instruction_giver_utterances)
     
         #initialise
-        current_state = (landmarks[0], instruction_giver_utterances[0], None)
+        current_state = (landmarks[random.randint(0, len(landmarks)-1)], instruction_giver_utterances[0], None)
         current_action = actions[random.randint(0, len(actions)-1)] #random first move temporary #pr(actions, current_action, current_state, theta, state_feature_dict)
     
         #print "begin theta: ", theta
