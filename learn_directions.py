@@ -7,8 +7,11 @@ from scipy.spatial import distance
 import cv2
 import os
 
+#settings
+iterations=3
+random_action=False
 temperature = 2.0
-a_lambda = 1.0
+#alpha specified later
 
 def savePolicyToFile(utterance, map_i, saving_to_file, a_string, others):
     with open("results/policy_"+str(map_i)+"_"+saving_to_file+".txt", "ab+") as myfile:
@@ -100,24 +103,27 @@ def createAllFeatures(states):
 def transpose(an_array):
     return numpy.array(an_array).T
 
-def pr(actions, utterance, current_action, state, theta, state_feature_dict):
+def pr(actions, utterance, state, theta):
     callee = "pr"
     selected_action = None
     selected_action_prob = numpy.array([0, 0, 0, 0, 0])
     for action in actions:
         a_sum = 0
-        for action in actions:
-            if action != current_action and action != None:
+        for action2 in actions:
+            if action2 != action and action != None:
                 a_sum += numpy.exp(\
-                       numpy.array(make_feature_vector(callee, utterance, state, action)) * \
+                       numpy.array(make_feature_vector(callee, utterance, state, action2)) * \
                        numpy.array(transpose(theta)) * \
                        1.0/temperature)
 
-        probability = numpy.exp((1.0/temperature) * numpy.array(transpose(theta)) * numpy.array(make_feature_vector(callee, utterance, state, current_action))) / a_sum
+        probability = numpy.exp((1.0/temperature) * numpy.array(transpose(theta)) * numpy.array(make_feature_vector(callee, utterance, state, action))) / a_sum
 
         if(tuple(selected_action_prob) < tuple(probability)):
             selected_action = action
             selected_action_prob = probability
+
+        #print "new selected action", action
+        #print "with prob", probability
 
     return selected_action
 
@@ -318,9 +324,6 @@ theta = [random.uniform(0, 0.01),random.uniform(0, 0.01),random.uniform(0, 0.01)
 
 callee = "main"
 
-iterations=100
-random_action=True
-
 saving_keyword = "iterations_" + str(iterations) + "_random_action_" + str(random_action)
 
 state_feature_dict = {}
@@ -350,7 +353,11 @@ for i in range(1,iterations): #until theta converges
                     next_state = (current_state[0], instruction_giver_utterances[idx+1], None)
                 
                 #next action
-                next_action = actions[random.randint(0, len(actions)-1)] if random_action else pr(actions, utterance, current_action, current_state, theta, state_feature_dict)
+                key = current_state[0] + "-" + str(current_action[0])
+                if key in state_feature_dict:
+                    next_action = actions[random.randint(0, len(actions)-1)] if random_action else pr(actions, utterance, current_state, state_feature_dict[key])
+                else:
+                    next_action = actions[random.randint(0, len(actions)-1)] if random_action else pr(actions, utterance, current_state, theta)
                 #print "next action for state", current_state[0], pr(actions, utterance, current_action, current_state, theta, state_feature_dict)
         
                 #next feature
